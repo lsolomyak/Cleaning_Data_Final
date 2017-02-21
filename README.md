@@ -1,9 +1,9 @@
 ==================================================================
-Title: Cleaning_Data_Final 
+
 Author: Levi Solomyak
 ==================================================================
-Data taken from: Human Activity Recognition Using Smartphones Dataset
-==================================================================
+ Cleaning_Data_Final
+ ==================================================================
 Version 1.0
 ==================================================================
 The following script run_Analysis.R takes the data downloaded fron the internet
@@ -25,3 +25,6 @@ There are two important data sets created from running the script:
 a) fullset - The full labeled and described dataset is called
 
 b) data_summary- the summary of the full data set. This set takes the average of each features and is broken down by subject ID  and by activity 
+
+
+Note: Data taken from: Human Activity Recognition Using Smartphones Dataset
