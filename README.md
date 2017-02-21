@@ -1,9 +1,9 @@
 ==================================================================
-
+Title: Cleaning_Data_Final_README
 Author: Levi Solomyak
 ==================================================================
- Cleaning_Data_Final
- ==================================================================
+Title: Cleaning_Data_Final
+==================================================================
 Version 1.0
 ==================================================================
 The following script run_Analysis.R takes the data downloaded fron the internet
