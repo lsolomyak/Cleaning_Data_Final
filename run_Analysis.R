@@ -3,7 +3,7 @@ library(dplyr)
 download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip", destfile = "~/Downloads/easy.zip", method="curl")
 directory <- unzip("~/Downloads/easy.zip", exdir = "~/Downloads/")
 
-#Lets import the training and testsets just to look at them now
+#Lets import the training and testsets 
 test_set <- read.csv(directory[15], header = FALSE)
 test_set <- strsplit(as.character(test_set$V1), " ") # split it up based on the tabs- indicating a new value
 test_set <- unlist(test_set)
@@ -17,7 +17,7 @@ test_set <- tbl_df(test_set)
 #turn all the values into numerics 
 test_set <- tbl_df(sapply(test_set, as.numeric)) #tbl_df(
 
-# same thing for the training set (see test set for explanation)
+# same thing for the training set 
 train_set <- read.csv(directory[27], header = FALSE)
 # lets try and make it presentable 
 train_set <- strsplit(as.character(train_set$V1), " ") 
@@ -49,7 +49,6 @@ test_set_lab <- factor(test_set_lab$V1, levels=seq(1:6), labels = c("WALKING", "
 subject_train <- read.csv(directory[26], header = FALSE, stringsAsFactors = TRUE)
 subject_test <- read.csv(directory[14], header = FALSE, stringsAsFactors = TRUE)
 
-#subject_test <- read.csv("~/Downloads/UCI HAR Dataset/test/subject_test.txt", header = FALSE, stringsAsFactors = TRUE)
 #make it a data frame 
 train_set_lab <- as.data.frame(train_set_lab)
 test_set_lab <- as.data.frame(test_set_lab)
@@ -64,18 +63,7 @@ names(testset) <-  unique_names$un_names
 
 tset <- tbl_df(tset)
 testset <- tbl_df(testset)
-#make sure the names are unique so we can turn it into a table 
-#names(tset) <- c("`subject_train$V1`","train_set_lab", features$features)
-#names(testset) <- c("`subject_test$V1`","test_set_lab", features$features)
-#un_names <- ave(as.character(names(testset)), names(testset), FUN=function(x) if (length(x)>1) paste0(x[1], '(', seq_along(x), ')') else x[1])
-#unique_names <- as.data.frame(un_names)
-#make sure the subject number is a factor 
 
-#now we add the feature names to the training set
-#names(train_set) <- unique_names$un_names
-#names(tset) <- unique_names$un_names
-#names(testset) <- unique_names$un_names
-#and to the test set 
 
 # now we add the labels and subject number and combine data sets
 names(tset) <- names(testset)
