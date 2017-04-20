@@ -1,89 +1,58 @@
 library(dplyr)
 #download the data
-download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip", destfile = "~/Downloads/easy.zip", method="curl")
-directory <- unzip("~/Downloads/easy.zip", exdir = "~/Downloads/")
+filename <- "getdata_dataset.zip"
 
-#Lets import the training and testsets 
-test_set <- read.csv(directory[15], header = FALSE)
-test_set <- strsplit(as.character(test_set$V1), " ") # split it up based on the tabs- indicating a new value
-test_set <- unlist(test_set)
-#get rid of the blanks
-test_set[test_set==""] <- NA 
-test_set <- na.omit(test_set)
-#turn the test set into a matrix 
-test_set <- matrix(test_set, ncol=561)
-#turn the set into a table
-test_set <- tbl_df(test_set)
-#turn all the values into numerics 
-test_set <- tbl_df(sapply(test_set, as.numeric)) 
+## Download and unzip the dataset:
+if (!file.exists(filename)){
+      fileURL <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip "
+      download.file(fileURL, filename, method="curl")
+}  
+if (!file.exists("UCI HAR Dataset")) { 
+      unzip(filename) 
+}
 
-# same thing for the training set 
-train_set <- read.csv(directory[27], header = FALSE)
-# lets try and make it presentable 
-train_set <- strsplit(as.character(train_set$V1), " ") 
-train_set <- unlist(train_set)
-train_set[train_set==""] <- NA
-train_set <- na.omit(train_set)
-train_set <- matrix(train_set, ncol=561 )
-train_set <- tbl_df(train_set)
-train_set <- tbl_df(sapply(train_set, as.numeric)) 
+testset <- read.table("UCI HAR Dataset/test/X_test.txt")
+trainset <- read.table("UCI HAR Dataset/train/X_train.txt")
 
-
-#get the features in
-features <- read.csv(directory[2], header = FALSE, sep = " ", stringsAsFactors = FALSE)
+#download the features
+features <- read.table("UCI HAR Dataset/features.txt", header = FALSE, sep = " ", stringsAsFactors = FALSE)
 features <- features[ ,2]
-features <- as.data.frame(features)
 
-#We know there are 561 features so thats how many columns our data set should have
-names(train_set) <- features$features
-names(test_set) <- features$features
 
-# lets import the labels 
-train_set_lab <- read.csv(directory[28], header = FALSE, stringsAsFactors = TRUE)
-test_set_lab <- read.csv(directory[16], header = FALSE, stringsAsFactors = TRUE)
+#download training and test set labels
+train_set_lab <- read.table("UCI HAR Dataset/train/y_train.txt")
+test_set_lab <- read.table("UCI HAR Dataset/test/y_test.txt")
+
 # convert it into factors
 train_set_lab <- factor(train_set_lab$V1, levels=seq(1:6), labels = c("WALKING", "WALKING_UPSTAIRS", "WALKING_DOWNSTAIRS", "SITTING", "STANDING","LAYING"))
 test_set_lab <- factor(test_set_lab$V1, levels=seq(1:6), labels = c("WALKING", "WALKING_UPSTAIRS", "WALKING_DOWNSTAIRS", "SITTING", "STANDING","LAYING"))
 
+
 #let's import the subject 
-subject_train <- read.csv(directory[26], header = FALSE, stringsAsFactors = TRUE)
-subject_test <- read.csv(directory[14], header = FALSE, stringsAsFactors = TRUE)
+subject_train <- read.table("UCI HAR Dataset/train/subject_train.txt", header = FALSE, stringsAsFactors = TRUE)
+subject_test <- read.csv("UCI HAR Dataset/test/subject_test.txt", header = FALSE, stringsAsFactors = TRUE)
 
-#make it a data frame 
-train_set_lab <- as.data.frame(train_set_lab)
-test_set_lab <- as.data.frame(test_set_lab)
-
-tset <- cbind(subject_train$V1,train_set_lab, train_set)
-testset <- cbind(subject_test$V1, test_set_lab, test_set)
-un_names <- ave(as.character(names(testset)), names(testset), FUN=function(x) if (length(x)>1) paste0(x[1], '(', seq_along(x), ')') else x[1])
-unique_names <- as.data.frame(un_names)
-
-
-
-names(tset) <-  unique_names$un_names
-names(testset) <-  unique_names$un_names
-
-tset <- tbl_df(tset)
-testset <- tbl_df(testset)
-
-
-# now we add the labels and subject number and combine data sets
-names(tset) <- names(testset)
+#bind the datasets together 
+tset <- cbind(subject_train,train_set_lab, trainset)
+testset <- cbind(subject_test, test_set_lab, testset)
+names(tset) <- c("subject", "activity", features)
+names(testset) <- c("subject", "activity", features)
 fullset <- rbind(tset, testset)
-#names(fullset) <- unique_names$un_names
-#names(fullset) <- c("`subject_train$V1`","train_set_lab", features$`features[, 2]`)
-fullset <- tbl_df(fullset)
-#make sure the subject number is a factor 
-fullset$`subject_test$V1` <- as.factor(fullset$`subject_test$V1`)
-#lets only choose the columns we need
-fullset <- select(fullset,`subject_test$V1`, test_set_lab, grep("mean" , names(fullset)) , grep("std" , names(fullset)))
+# lets get a unique name for every column
+un_names <- ave(as.character(names(testset)), names(testset), FUN=function(x) if (length(x)>1) paste0(x[1], '.', seq_along(x), ')') else x[1])
+unique_names <- as.data.frame(un_names)
+names(fullset) <- unique_names$un_names
+names(fullset) <- gsub("-mean",".mean", names(fullset))
+names(fullset) <- gsub("-std",".std", names(fullset))
 
-#first we group by id then by activity
-#and rename the first two columns- first all the means then all the std 
+#keep only the columns we want
+fullset <- select(fullset,subject, activity, grep("mean" , names(fullset)) , grep("std" , names(fullset)))
 
-# now we get the summary variable called data_summary 
-fullset$`subject_test$V1` <- as.factor(fullset$`subject_test$V1`)
-data_summary <- fullset %>% group_by(`subject_test$V1`, test_set_lab) %>% summarise_each(funs(mean), `tBodyAcc-mean()-X`:`fBodyBodyGyroJerkMag-std()`)
-data_summary <- rename(data_summary,subject= `subject_test$V1` , activity = test_set_lab)
+#turn id into factor
+fullset$subject <- as.factor(fullset$subject)
+  #and get the data summary 
+data_summary <- fullset %>% group_by(subject, activity) %>% summarise_each(funs(mean), `tBodyAcc.mean()-X`:`fBodyBodyGyroJerkMag.std()`)
 
-write.table(data_summary, "~/Downloads/summarized_data.csv", row.names = FALSE)
+
+write.table(data_summary, "summarized_data.csv", row.names = FALSE)
+  #to read the data table set header=true 
