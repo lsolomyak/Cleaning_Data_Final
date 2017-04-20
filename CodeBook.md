@@ -27,15 +27,6 @@ if(!file.exists(".data")){dir.create(".data")}
 download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip", destfile = "./data/easy.zip", method="curl")
 directory <- unzip("~/Downloads/easy.zip", exdir = ".data")
 
-directory now has all the files we need. If we look at directory, here are the relevant file names
-[1] ".data/UCI HAR Dataset/activity_labels.txt"                         
-[2] ".data/UCI HAR Dataset/features.txt"                                                                  
-[14] ".data/UCI HAR Dataset/test/subject_test.txt"                       
-[15] ".data/UCI HAR Dataset/test/X_test.txt"                             
-[16] ".data/UCI HAR Dataset/test/y_test.txt"                             
-[26] ".data/UCI HAR Dataset/train/subject_train.txt"                     
-[27] ".data/UCI HAR Dataset/train/X_train.txt"                           
-[28] ".data/UCI HAR Dataset/train/y_train.txt"    
 
 There are three types of files to take note of 
 X - the actual measurements
@@ -75,10 +66,10 @@ subject           activity tBodyAcc.mean...X tBodyAcc.mean...Y
 
 
 Step 3: Write out the data 
-write.table(data_summary, "summarized_data.csv", col.names = TRUE )
+write.table(data_summary, "summarized_data.csv", row.names = FALSE )
 
 To see the data: 
-data <- read.table("summarized_data.csv")
+data <- read.table("summarized_data.csv", header=TRUE)
 View(data)
 
 will work. 
